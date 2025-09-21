@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduAI - Student Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <header>
+        <nav>
+            <a href="/" class="logo">EduAI</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/student_dashboard">Dashboard</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="dashboard">
+            <div class="sidebar">
+                <h3>Welcome, {{ name }}</h3>
+                <ul>
+                    <li><a href="#questions">Answer Questions</a></li>
+                    <li><a href="#progress">View Progress</a></li>
+                    <li><a href="#achievements">Achievements</a></li>
+                </ul>
+            </div>
+
+            <div class="main-content">
+                <div class="flash-messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <h2>Available Questions</h2>
+                <div class="questions-section">
+                    {% for question in questions %}
+                        <div class="question-card">
+                            <p><strong>Question:</strong> {{ question[1] }}</p>
+                            <form method="POST" action="/student/submit">
+                                <input type="hidden" name="question_id" value="{{ question[0] }}">
+                                <textarea name="answer" placeholder="Your answer..." required></textarea>
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="question-card">
+                            <p>No questions available yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <h2>Recent Feedback</h2>
+                <div class="feedback-section">
+                    {% for feedback in feedback %}
+                        <div class="feedback-card">
+                            <p><strong>Question:</strong> {{ feedback[0] }}</p>
+                            <p><strong>Your Answer:</strong> {{ feedback[1] }}</p>
+                            <p><em>Feedback pending...</em></p>
+                        </div>
+                    {% else %}
+                        <div class="feedback-card">
+                            <p>No feedback available yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. Empowering education through artificial intelligence.</p>
+    </footer>
+</body>
+</html>
