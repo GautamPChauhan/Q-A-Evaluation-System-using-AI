@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register as Teacher - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <header>
+        <nav>
+            <a href="/" class="logo">EduAI</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Login</a></li>
+                {% if session.user_id %}
+                    <li><a href="/{{ session.role }}_dashboard">Dashboard</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="form-section">
+            <h2>Register as Teacher</h2>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <form method="POST">
+                <input type="text" name="username" placeholder="Username" value="{{ form_data.username or '' }}" required>
+                <input type="text" name="full_name" placeholder="Full Name" value="{{ form_data.full_name or '' }}" required>
+                <input type="date" name="dob" placeholder="Date of Birth (YYYY-MM-DD)" value="{{ form_data.dob or '' }}" required>
+                <input type="text" name="last_degree" placeholder="Last Educational Degree" value="{{ form_data.last_degree or '' }}" required>
+                <input type="email" name="email" placeholder="Email" value="{{ form_data.email or '' }}" required>
+                <input type="text" name="contact" placeholder="Contact Number" value="{{ form_data.contact or '' }}" required>
+                <select name="gender" required>
+                    <option value="" disabled {% if not form_data.gender %}selected{% endif %}>Select Gender</option>
+                    <option value="Male" {% if form_data.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if form_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if form_data.gender == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+                <textarea name="address" placeholder="Address" required>{{ form_data.address or '' }}</textarea>
+                <input type="text" name="expertise" placeholder="Area of Expertise" value="{{ form_data.expertise or '' }}" required>
+                <input type="text" name="subjects_taught" placeholder="Subjects Taught" value="{{ form_data.subjects_taught or '' }}" required>
+                <input type="number" name="experience_years" placeholder="Experience (Years)" value="{{ form_data.experience_years or '' }}" required>
+                <input type="number" name="industry_experience_years" placeholder="Industry Experience (Years)" value="{{ form_data.industry_experience_years or '' }}" required>
+                <input type="number" name="research_papers" placeholder="Number of Research Papers" value="{{ form_data.research_papers or '' }}" required>
+                <input type="text" name="department" placeholder="Department" value="{{ form_data.department or '' }}" required>
+                <input type="text" name="college" placeholder="College" value="{{ form_data.college or '' }}" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Sign Up Now</button>
+            </form>
+
+            <p>Already have an account? <a href="/login">Login</a></p>
+            <p>Register as <a href="/register/student">Student</a> or <a href="/register/admin">Admin</a> instead</p>
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. Empowering education through artificial intelligence.</p>
+    </footer>
+</body>
+</html>
