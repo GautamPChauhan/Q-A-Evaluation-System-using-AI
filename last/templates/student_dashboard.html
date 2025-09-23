@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <header>
+        <nav>
+            <a href="/" class="logo">EduAI</a>
+            <ul class="nav-links">
+                <li><a href="/student_dashboard">Dashboard</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="form-section">
+            <h1>Student Dashboard</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <h2>Available Questions</h2>
+            <form method="POST" action="/student/submit" class="registration-form">
+                <fieldset class="form-group">
+                    <legend>Submit Answer</legend>
+                    <div class="form-field">
+                        <label for="question_id">Select Question</label>
+                        <select id="question_id" name="question_id" required>
+                            <option value="" disabled selected>Choose a question</option>
+                            {% for question in questions %}
+                                <option value="{{ question[0] }}">{{ question[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="answer">Your Answer</label>
+                        <textarea id="answer" name="answer" placeholder="Enter your answer" required></textarea>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="submit" class="submit-btn">Submit Answer</button>
+                    </div>
+                </fieldset>
+            </form>
+
+            <h2>Your Submitted Answers</h2>
+            {% if feedback %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Your Answer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in feedback %}
+                            <tr>
+                                <td>{{ item[0] }}</td>
+                                <td>{{ item[1] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No answers submitted yet.</p>
+            {% endif %}
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+</body>
+</html>
