@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <header>
+        <nav>
+            <a href="/" class="logo">EduAI</a>
+            <ul class="nav-links">
+                <li><a href="/teacher_dashboard">Dashboard</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="form-section">
+            <h1>Teacher Dashboard</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <h2>Upload a Question</h2>
+            <form method="POST" action="/teacher/upload" class="registration-form">
+                <fieldset class="form-group">
+                    <legend>New Question</legend>
+                    <div class="form-field">
+                        <label for="question">Question</label>
+                        <textarea id="question" name="question" placeholder="Enter your question" required></textarea>
+                    </div>
+                    <div class="form-field">
+                        <label for="keywords">Keywords</label>
+                        <input type="text" id="keywords" name="keywords" placeholder="Enter keywords (comma-separated)" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="actual_answer">Actual Answer</label>
+                        <textarea id="actual_answer" name="actual_answer" placeholder="Enter the correct answer" required></textarea>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="submit" class="submit-btn">Upload Question</button>
+                    </div>
+                </fieldset>
+            </form>
+
+            <h2>Your Questions</h2>
+            {% if questions %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Keywords</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for question in questions %}
+                            <tr>
+                                <td>{{ question[1] }}</td>
+                                <td>{{ question[2] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No questions uploaded yet.</p>
+            {% endif %}
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+</body>
+</html>
