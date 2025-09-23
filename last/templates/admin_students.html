@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - Admin Dashboard - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/admin_dashboard">Dashboard</a></li>
+            <li><a href="/admin/teachers">Teachers</a></li>
+            <li><a href="/admin/students">Students</a></li>
+            <li><a href="/admin/courses_semesters">Courses/Semesters</a></li>
+            <li><a href="/admin/evaluations">View Evaluations</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section class="form-section">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <h2>Students</h2>
+            {% if students %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Roll No</th>
+                            <th>Enrollment No</th>
+                            <th>Contact</th>
+                            <th>DOB</th>
+                            <th>Course ID</th>
+                            <th>Semester ID</th>
+                            <th>Gender</th>
+                            <th>Address</th>
+                            <th>Department</th>
+                            <th>University</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                            <tr>
+                                <td>{{ student[0] }}</td>
+                                <td>{{ student[1] }}</td>
+                                <td>{{ student[2] }}</td>
+                                <td>{{ student[3] }}</td>
+                                <td>{{ student[4] }}</td>
+                                <td>{{ student[5] }}</td>
+                                <td>{{ student[6] }}</td>
+                                <td>{{ student[7] }}</td>
+                                <td>{{ student[8] }}</td>
+                                <td>{{ student[9] }}</td>
+                                <td>{{ student[10] }}</td>
+                                <td>{{ student[11] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No students found.</p>
+            {% endif %}
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('closed');
+            document.querySelector('main').classList.toggle('full-width');
+        }
+    </script>
+</body>
+</html>
