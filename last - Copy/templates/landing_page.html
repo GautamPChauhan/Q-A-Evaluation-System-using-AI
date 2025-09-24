@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduAI - Smart Question Answer System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <header class="header-landing">
+        <nav class="nav-landing">
+            <a href="/" class="logo">EduAI</a>
+            <ul class="nav-links-landing">
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Login</a></li>
+                {% if session.user_id %}
+                    <li><a href="/{{ session.role }}_dashboard">Dashboard</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <style>
+        main.landing-main {
+            margin-left: 0;
+            max-width: 100%;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+    <main class="landing-main">
+        <section class="hero-section">
+            <h1 class="hero-title">Smart Question Answer System</h1>
+            <h2 class="hero-subtitle">Revolutionizing Education with AI-Powered Assessment</h2>
+
+            <div class="process-flow">
+                <div class="process-step">
+                    <div class="step-icon">📝</div>
+                    <h3>Teacher Creates</h3>
+                    <p>Questions + Answers</p>
+                </div>
+                <div class="arrow">➡️</div>
+                <div class="process-step">
+                    <div class="step-icon">🤖</div>
+                    <h3>AI Evaluates</h3>
+                    <p>Semantic Analysis</p>
+                </div>
+                <div class="arrow">➡️</div>
+                <div class="process-step">
+                    <div class="step-icon">👨‍🎓</div>
+                    <h3>Student Gets</h3>
+                    <p>Instant Feedback</p>
+                </div>
+            </div>
+
+            <p class="hero-description">
+                Experience the future of education with our intelligent Q&A platform. Teachers can create comprehensive question sets with model answers, while our advanced AI system evaluates student responses for accurate, fair assessment.
+            </p>
+
+            <a href="/login" class="register-btn">Login to Get Started</a>
+        </section>
+
+        <section class="features-section">
+            <h2 class="features-title">Why Choose EduAI?</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <h3 class="feature-title">AI-Powered Evaluation</h3>
+                    <p>Advanced semantic analysis ensures accurate assessment of student responses.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Instant Feedback</h3>
+                    <p>Students receive immediate, detailed feedback on their answers.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Smart Analytics</h3>
+                    <p>Comprehensive insights help optimize learning outcomes.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Accurate Scoring</h3>
+                    <p>Intelligent scoring based on model answers for precise evaluation.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+</body>
+</html>
