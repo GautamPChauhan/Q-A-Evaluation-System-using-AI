@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Profile - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .profile-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .profile-section h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .profile-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .profile-table th, .profile-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .profile-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .edit-button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/teacher_dashboard">Dashboard</a></li>
+            <li><a href="/create_exam">Create Exam</a></li>
+            <li><a href="/view_answers">View Answers</a></li>
+            <li><a href="/view_results">View Results</a></li>
+            <li><a href="/teacher/profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section class="profile-section">
+            <h1>Teacher Profile</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <h2>Your Profile Details</h2>
+            {% if profile %}
+                <table class="profile-table">
+                    <tr>
+                        <th>Email</th>
+                        <td>{{ email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Full Name</th>
+                        <td>{{ profile[0] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date of Birth</th>
+                        <td>{{ profile[1] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Last Degree</th>
+                        <td>{{ profile[2] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Contact</th>
+                        <td>{{ profile[3] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Gender</th>
+                        <td>{{ profile[4] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address</th>
+                        <td>{{ profile[5] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Expertise</th>
+                        <td>{{ profile[6] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Subjects Taught</th>
+                        <td>{{ profile[7] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Experience (Years)</th>
+                        <td>{{ profile[8] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Industry Experience (Years)</th>
+                        <td>{{ profile[9] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Research Papers</th>
+                        <td>{{ profile[10] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Department</th>
+                        <td>{{ profile[11] }}</td>
+                    </tr>
+                    <tr>
+                        <th>University</th>
+                        <td>{{ profile[12] }}</td>
+                    </tr>
+                </table>
+                <a href="/teacher/edit_profile" class="edit-button">Edit Profile</a>
+            {% else %}
+                <p>No profile details found.</p>
+            {% endif %}
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('closed');
+            document.querySelector('main').classList.toggle('full-width');
+        }
+    </script>
+</body>
+</html>

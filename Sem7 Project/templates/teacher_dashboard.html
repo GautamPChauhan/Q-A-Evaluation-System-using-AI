@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Consistent modern dashboard theme */
+        .teacher-upload-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .teacher-upload-section h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        .upload-form input[type="file"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .upload-form button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .upload-form button:hover {
+            background-color: #0056b3;
+        }
+        .error-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+            color: #dc3545;
+        }
+        .error-list li {
+            background-color: #f8d7da;
+            padding: 8px;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .exam-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .exam-table th, .exam-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .exam-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #333;
+        }
+        .exam-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .exam-table a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .exam-table a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/teacher_dashboard">Dashboard</a></li>
+            <li><a href="/create_exam">Create Exam</a></li>
+            <li><a href="/view_answers">View Answers</a></li>
+            <li><a href="/view_results">View Results</a></li>
+            <li><a href="/teacher/profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section class="form-section">
+            <h1>Teacher Dashboard</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="teacher-upload-section">
+                <h2>Create New Exam</h2>
+                <a href="/create_exam" class="upload-form button">Create Exam</a>
+            </div>
+
+            <h2>Your Exams</h2>
+            {% if exams %}
+            <table class="exam-table">
+                <thead>
+                    <tr>
+                        <th>Exam Name</th>
+                        <th>Course</th>
+                        <th>Semester</th>
+                        <th>Subject</th>
+                        <th>Topic</th>
+                        <th>Max Marks</th>
+                        <th>Min Marks</th>
+                        <th>Exam Date</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in exams %}
+                    <tr>
+                        <td>{{ e.exam_name }}</td>
+                        <td>{{ e.course_name }}</td>
+                        <td>{{ e.semester_name }}</td>
+                        <td>{{ e.subject_name }}</td>
+                        <td>{{ e.topic }}</td>
+                        <td>{{ e.max_marks }}</td>
+                        <td>{{ e.min_marks }}</td>
+                        <td>{{ e.exam_date }}</td>
+                        <td>{{ e.start_time }}</td>
+                        <td>{{ e.end_time }}</td>
+                        <td>
+                            <a href="{{ url_for('view_exam', exam_id=e.exam_id) }}">View</a> |
+                            <a href="{{ url_for('edit_exam', exam_id=e.exam_id) }}">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No exams created yet.</p>
+            {% endif %}
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('closed');
+            document.querySelector('main').classList.toggle('full-width');
+        }
+    </script>
+</body>
+</html>

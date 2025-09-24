@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/admin_dashboard">Dashboard</a></li>
+            <li><a href="/admin/teachers">Teachers</a></li>
+            <li><a href="/admin/students">Students</a></li>
+            <li><a href="/admin/courses_semesters">Courses/Semesters</a></li>
+            <li><a href="/admin/evaluations">View Evaluations</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section class="form-section">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <h2>Overview</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">👥</span>
+                    <h3 class="feature-title">Total Users</h3>
+                    <p>{{ user_count }}</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📝</span>
+                    <h3 class="feature-title">Total Questions</h3>
+                    <p>{{ question_count }}</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📜</span>
+                    <h3 class="feature-title">Total Answers</h3>
+                    <p>{{ answer_count }}</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <h3 class="feature-title">Total Evaluations</h3>
+                    <p>{{ evaluation_count }}</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('closed');
+            document.querySelector('main').classList.toggle('full-width');
+        }
+    </script>
+</body>
+</html>

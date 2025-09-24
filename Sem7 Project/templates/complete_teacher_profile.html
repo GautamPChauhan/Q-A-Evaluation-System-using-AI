@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Teacher Profile - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .profile-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .profile-section h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        .profile-form label {
+            font-weight: bold;
+        }
+        .profile-form input,
+        .profile-form select,
+        .profile-form textarea {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .profile-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .profile-form button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .profile-form button:hover {
+            background-color: #0056b3;
+        }
+        .skip-button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .skip-button:hover {
+            background-color: #5a6268;
+        }
+        .error-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+            color: #dc3545;
+        }
+        .error-list li {
+            background-color: #f8d7da;
+            padding: 8px;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/teacher_dashboard">Dashboard</a></li>
+            <li><a href="/create_exam">Create Exam</a></li>
+            <li><a href="/view_answers">View Answers</a></li>
+            <li><a href="/view_results">View Results</a></li>
+            <li><a href="/teacher/profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section class="profile-section">
+            <h1>Complete Teacher Profile</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class="error-list">
+                            {% for category, message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <h2>Complete Your Profile</h2>
+            <form method="POST" class="profile-form">
+                <label>Full Name *</label>
+                <input type="text" name="full_name" required><br>
+
+                <label>Date of Birth *</label>
+                <input type="date" name="dob" required><br>
+
+                <label>Last Degree *</label>
+                <input type="text" name="last_degree" required><br>
+
+                <label>Contact *</label>
+                <input type="text" name="contact" required><br>
+
+                <label>Gender *</label>
+                <select name="gender" required>
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select><br>
+
+                <label>Address *</label>
+                <textarea name="address" required></textarea><br>
+
+                <label>Expertise *</label>
+                <input type="text" name="expertise" required><br>
+
+                <label>Subjects Taught *</label>
+                <textarea name="subjects_taught" required></textarea><br>
+
+                <label>Experience (Years) *</label>
+                <input type="number" name="experience_years" min="0" required><br>
+
+                <label>Industry Experience (Years) *</label>
+                <input type="number" name="industry_experience_years" min="0" required><br>
+
+                <label>Research Papers *</label>
+                <input type="number" name="research_papers" min="0" required><br>
+
+                <label>Department *</label>
+                <input type="text" name="department" required><br>
+
+                <label>University *</label>
+                <input type="text" name="university" required><br><br>
+
+                <button type="submit">Save</button>
+            </form>
+            <form method="POST" class="profile-form">
+                <button type="submit" name="skip" value="1" class="skip-button">Skip</button>
+            </form>
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('closed');
+            document.querySelector('main').classList.toggle('full-width');
+        }
+    </script>
+</body>
+</html>
