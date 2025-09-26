@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/teacher_dashboard">Dashboard</a></li>
+            <li><a href="/create_exam">Create Exam</a></li>
+            <li><a href="/view_answers">View Answers</a></li>
+            <li><a href="/view_results">View Results</a></li>
+            <li><a href="/teacher/profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section class="form-section admin-form-section">
+            <h1>Teacher Dashboard</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <h2>Quick Actions</h2>
+            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem;">
+                <div class="feature-item" style="text-align: center;">
+                    <a href="/create_exam" style="text-decoration: none; color: inherit;">
+                        <span class="feature-icon">📝</span>
+                        <h4>Create New Exam</h4>
+                        <p>Design and upload exam questions</p>
+                    </a>
+                </div>
+                <div class="feature-item" style="text-align: center;">
+                    <a href="/view_answers" style="text-decoration: none; color: inherit;">
+                        <span class="feature-icon">📋</span>
+                        <h4>View Answers</h4>
+                        <p>Check student submissions</p>
+                    </a>
+                </div>
+                <div class="feature-item" style="text-align: center;">
+                    <a href="/view_results" style="text-decoration: none; color: inherit;">
+                        <span class="feature-icon">📊</span>
+                        <h4>View Results</h4>
+                        <p>Analyze exam performance</p>
+                    </a>
+                </div>
+                <div class="feature-item" style="text-align: center;">
+                    <a href="/teacher/profile" style="text-decoration: none; color: inherit;">
+                        <span class="feature-icon">👨‍🏫</span>
+                        <h4>View Profile</h4>
+                        <p>Manage your profile information</p>
+                    </a>
+                </div>
+                
+                
+            </div>
+
+            <h2>Your Exams</h2>
+            {% if exams %}
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exam Name</th>
+                                <th>Course</th>
+                                <th>Semester</th>
+                                <th>Subject</th>
+                                <th>Topic</th>
+                                <th>Max Marks</th>
+                                <th>Min Marks</th>
+                                <th>Exam Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in exams %}
+                            <tr>
+                                <td style="font-weight: 600; color: #4834d4;">{{ e.exam_name }}</td>
+                                <td>{{ e.course_name }}</td>
+                                <td>{{ e.semester_name }}</td>
+                                <td>{{ e.subject_name }}</td>
+                                <td>{{ e.topic }}</td>
+                                <td><span style="font-weight: bold; color: #27ae60;">{{ e.max_marks }}</span></td>
+                                <td><span style="font-weight: bold; color: #e74c3c;">{{ e.min_marks }}</span></td>
+                                <td>{{ e.exam_date }}</td>
+                                <td>{{ e.start_time }}</td>
+                                <td>{{ e.end_time }}</td>
+                                <td>
+                                    <a href="{{ url_for('view_exam', exam_id=e.exam_id) }}" class="edit-button" style="margin-right: 0.5rem;">View</a>
+                                    <a href="{{ url_for('edit_exam', exam_id=e.exam_id) }}" class="edit-button">Edit</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background: rgba(72, 52, 212, 0.1); border-radius: 8px; border: 1px solid rgba(72, 52, 212, 0.2);">
+                    <h3 style="color: #4834d4; margin-bottom: 0.5rem;">📊 Exam Statistics</h3>
+                    <p><strong>Total Exams Created:</strong> {{ exams|length }}</p>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 3rem; background: rgba(255, 107, 107, 0.1); border-radius: 12px; border: 1px solid rgba(255, 107, 107, 0.2);">
+                    <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📝</span>
+                    <h3 style="color: #e74c3c; margin-bottom: 1rem;">No Exams Created Yet</h3>
+                    <p style="color: #666; margin-bottom: 2rem;">Get started by creating your first exam. Upload questions, set marking criteria, and schedule exams for your students.</p>
+                    <a href="/create_exam" class="submit-btn">Create Your First Exam</a>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('closed');
+            document.querySelector('main').classList.toggle('full-width');
+        }
+    </script>
+</body>
+</html>

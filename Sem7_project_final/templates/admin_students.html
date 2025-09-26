@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - Admin Dashboard - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/admin_dashboard">Dashboard</a></li>
+            <li><a href="/admin/teachers">Teachers</a></li>
+            <li><a href="/admin/students">Students</a></li>
+            <li><a href="/admin/courses_semesters">Courses/Semesters</a></li>
+            <li><a href="/admin/evaluations">View Evaluations</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section class="form-section admin-form-section">
+            <h1>Student Management</h1>
+            <p>Welcome, {{ name }}!</p>
+            
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <h2>Upload Students</h2>
+            <form class="upload-form" method="POST" action="{{ url_for('upload_students_excel') }}" enctype="multipart/form-data">
+                <label for="upload_course_id">Course:</label>
+                <select id="upload_course_id" name="course_id" onchange="fetchSemesters(this.value, 'upload_semester_id')" required>
+                    <option value="">Select Course</option>
+                    {% for course in courses %}
+                        <option value="{{ course.course_id }}">{{ course.course_name }}</option>
+                    {% endfor %}
+                </select>
+                
+                <label for="upload_semester_id">Semester:</label>
+                <select id="upload_semester_id" name="semester_id" required>
+                    <option value="">Select Semester</option>
+                </select>
+                
+                <label for="excel_file">Upload Excel File:</label>
+                <input type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls" required>
+                
+                <button type="submit">Upload Students</button>
+            </form>
+
+            <h2>Filter Students</h2>
+            <form class="filter-form" method="POST" action="{{ url_for('admin_students') }}">
+                <label for="filter_course_id">Course:</label>
+                <select id="filter_course_id" name="course_id" onchange="fetchSemesters(this.value, 'filter_semester_id')">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                        <option value="{{ course.course_id }}" {% if course.course_id|string == selected_course_id %}selected{% endif %}>
+                            {{ course.course_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <label for="filter_semester_id">Semester:</label>
+                <select id="filter_semester_id" name="semester_id">
+                    <option value="">All Semesters</option>
+                    <!-- Populated via JavaScript -->
+                </select>
+                
+                <button type="submit">Filter</button>
+            </form>
+
+            <h2>Students</h2>
+            {% if students %}
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Roll No</th>
+                                <th>Enrollment No</th>
+                                <th>Contact</th>
+                                <th>DOB</th>
+                                <th>Course</th>
+                                <th>Semester</th>
+                                <th>Gender</th>
+                                <th>Address</th>
+                                <th>Department</th>
+                                <th>University</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                                <tr>
+                                    <td>{{ student.student_id }}</td>
+                                    <td>{{ student.full_name or 'Not Provided' }}</td>
+                                    <td>{{ student.roll_no or 'Not Provided' }}</td>
+                                    <td>{{ student.enrollment_no or 'Not Provided' }}</td>
+                                    <td>{{ student.contact or 'Not Provided' }}</td>
+                                    <td>{{ student.dob.strftime('%Y-%m-%d') if student.dob else 'Not Provided' }}</td>
+                                    <td>{{ student.course_name or 'Not Assigned' }}</td>
+                                    <td>{{ student.semester_name or 'Not Assigned' }}</td>
+                                    <td>{{ student.gender or 'Not Provided' }}</td>
+                                    <td>{{ student.address or 'Not Provided' }}</td>
+                                    <td>{{ student.department or 'Not Provided' }}</td>
+                                    <td>{{ student.university or 'Not Provided' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No students found.</p>
+            {% endif %}
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer>
+
+    <script>
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('closed');
+        document.querySelector('main').classList.toggle('full-width');
+    }
+
+    async function fetchSemesters(courseId, selectId) {
+        const semesterSelect = document.getElementById(selectId);
+        semesterSelect.innerHTML = '<option value="">' + (selectId === 'filter_semester_id' ? 'All Semesters' : 'Select Semester') + '</option>';
+        
+        if (!courseId) {
+            return; // No course selected, keep default option
+        }
+
+        try {
+            const response = await fetch(`/admin/get_semesters/${courseId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.error) {
+                semesterSelect.innerHTML = '<option value="">Error loading semesters</option>';
+                console.error('Server error:', data.error);
+                return;
+            }
+            if (data.semesters.length === 0) {
+                semesterSelect.innerHTML = '<option value="">No semesters available</option>';
+                return;
+            }
+            data.semesters.forEach(semester => {
+                const option = document.createElement('option');
+                option.value = semester.semester_id;
+                option.textContent = semester.semester_name;
+                if (semester.semester_id == '{{ selected_semester_id }}' && selectId === 'filter_semester_id') {
+                    option.selected = true;
+                }
+                semesterSelect.appendChild(option);
+            });
+        } catch (error) {
+            semesterSelect.innerHTML = '<option value="">Error loading semesters</option>';
+            console.error('Error fetching semesters:', error);
+        }
+    }
+
+    // Preload semesters for filter form if course_id is selected
+    {% if selected_course_id %}
+        fetchSemesters('{{ selected_course_id }}', 'filter_semester_id');
+    {% endif %}
+</script>
+
+</body>
+</html>
