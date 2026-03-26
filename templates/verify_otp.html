@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========================================
+        OTP VERIFICATION PAGE STYLES
+        ======================================== */
+
+        /* OTP Card Container */
+        .otp-card {
+            max-width: 450px;
+            margin: 4rem auto;
+            padding: 3rem 2.5rem;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(72, 52, 212, 0.1);
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        /* OTP Icon Circle */
+        .otp-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .otp-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        /* OTP Card Heading */
+        .otp-card h2 {
+            color: #4834d4;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* OTP Description Text */
+        .otp-description {
+            color: #555;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        /* OTP Form Container */
+        .otp-form {
+            margin: 2rem 0;
+        }
+
+        /* OTP Input Field */
+        .otp-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.8rem;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            border: 2px solid rgba(72, 52, 212, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            color: #4834d4;
+        }
+
+        .otp-input:focus {
+            border-color: #4834d4;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(72, 52, 212, 0.15);
+            background: #fff;
+        }
+
+        .otp-input::placeholder {
+            color: #ccc;
+            font-weight: 400;
+        }
+
+        /* Input Hint Text */
+        .input-hint {
+            display: block;
+            margin-top: 0.5rem;
+            color: #666;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* OTP Footer Section */
+        .otp-footer {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(72, 52, 212, 0.1);
+        }
+
+        /* Help Text */
+        .otp-help {
+            color: #555;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        /* Resend OTP Link */
+        .otp-resend-link {
+            color: #4834d4;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .otp-resend-link:hover {
+            color: #686de0;
+            text-decoration: underline;
+        }
+
+        /* Back Link Container */
+        .otp-back {
+            margin-top: 1rem;
+        }
+
+        /* Back to Login Link */
+        .otp-back-link {
+            color: #6c757d;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .otp-back-link:hover {
+            color: #4834d4;
+            transform: translateX(-3px);
+        }
+
+        /* ========================================
+        RESPONSIVE DESIGN - MOBILE
+        ======================================== */
+
+        @media (max-width: 768px) {
+            .otp-card {
+                margin: 2rem 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .otp-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .otp-icon i {
+                font-size: 2rem;
+            }
+
+            .otp-card h2 {
+                font-size: 1.5rem;
+            }
+
+            .otp-input {
+                font-size: 1.5rem;
+                letter-spacing: 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Horizontal Navigation -->
+    <nav class="horizontal-nav">
+        <div class="nav-content">
+            <a href="/" class="logo">EduAI</a>
+            <ul class="nav-links">
+                <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            </ul>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <main class="main-landing">
+        <div class="container">
+            <section class="otp-card">
+                <div class="otp-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                
+                <h2><i class="fas fa-lock"></i> Verify OTP</h2>
+                <p class="otp-description">An OTP has been sent to your registered email address. Please enter the 6-digit code to verify your identity.</p>
+
+                <!-- Flash Messages -->
+                <div class="flash-messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="flash {{ category }}">
+                                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <form method="POST" class="otp-form">
+                    <div class="form-field">
+                        <label for="otp">
+                            <i class="fas fa-key"></i> Enter OTP
+                        </label>
+                        <input 
+                            type="text" 
+                            id="otp"
+                            name="otp" 
+                            placeholder="000000" 
+                            required 
+                            maxlength="6"
+                            pattern="[0-9]{6}"
+                            autocomplete="off"
+                            class="otp-input">
+                        <small class="input-hint">Please enter the 6-digit code</small>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-check-circle"></i> Verify OTP
+                    </button>
+                </form>
+
+                <div class="otp-footer">
+                    <p class="otp-help">
+                        <i class="fas fa-question-circle"></i> Didn't receive the code? 
+                        <a href="/resend-otp" class="otp-resend-link">Resend OTP</a>
+                    </p>
+                    <p class="otp-back">
+                        <a href="/login" class="otp-back-link">
+                            <i class="fas fa-arrow-left"></i> Back to Login
+                        </a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer> -->
+
+    <script>
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector('.horizontal-nav .nav-links');
+            navLinks.classList.toggle('active');
+        }
+
+        // Auto-format OTP input (numbers only)
+        document.getElementById('otp').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Auto-submit when 6 digits are entered (optional)
+        document.getElementById('otp').addEventListener('input', function(e) {
+            if (this.value.length === 6) {
+                // Optional: Auto-submit form
+                // this.form.submit();
+            }
+        });
+    </script>
+</body>
+</html>

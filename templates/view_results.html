@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Results - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        :root {
+            --primary: #4834d4;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --grey: #6c757d;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 1.8rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary);
+            font-size: 2rem;
+        }
+        
+        .page-header p {
+            margin: 0;
+            color: var(--grey);
+        }
+        
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.8rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(72, 52, 212, 0.1);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--grey);
+            color: white;
+        }
+        
+        /* Exam Selector */
+        .exam-selector {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .exam-selector label {
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+        
+        .exam-selector select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .exam-selector select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(72, 52, 212, 0.1);
+        }
+        
+        /* Results Card */
+        .results-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .results-header h2 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 1.6rem;
+        }
+        
+        .export-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+        
+        /* Exam Info Banner */
+        .exam-info-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .exam-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .exam-info-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 0.3rem;
+        }
+        
+        .exam-info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.passed {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+        
+        .stat-card.failed {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        }
+        
+        .stat-card.percentage {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        }
+        
+        .stat-card.average {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        }
+        
+        .stat-card.highest {
+            background: linear-gradient(135deg, #d4edda 0%, #b8daff 100%);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            line-height: 1;
+        }
+        
+        .stat-card.passed .stat-value {
+            color: #155724;
+        }
+        
+        .stat-card.failed .stat-value {
+            color: #721c24;
+        }
+        
+        .stat-card.percentage .stat-value {
+            color: #856404;
+        }
+        
+        .stat-card.average .stat-value {
+            color: #0c5460;
+        }
+        
+        .stat-card.highest .stat-value {
+            color: #004085;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        /* Results Table */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+        
+        .results-table thead {
+            background: linear-gradient(135deg, var(--primary) 0%, #667eea 100%);
+            color: white;
+        }
+        
+        .results-table th {
+            padding: 1.2rem 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        
+        .results-table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.2s ease;
+        }
+        
+        .results-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .results-table td {
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+        
+        .rank-badge {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            border-radius: 50%;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .rank-badge.top-3 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+        }
+        
+        .score-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        
+        .score-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+        
+        .score-label {
+            font-size: 0.7rem;
+            color: #999;
+            text-transform: uppercase;
+        }
+        
+        .final-score {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            color: #155724;
+            font-size: 1.1rem;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+        
+        .status-badge.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 16px;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            color: var(--grey);
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            color: var(--grey);
+            opacity: 0.8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .export-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/teacher_dashboard">Dashboard</a></li>
+            <li><a href="/create_exam">Create Exam</a></li>
+            <li><a href="/view_answers">View Answers</a></li>
+            <li><a href="/view_results" class="active">View Results</a></li>
+            <li><a href="/teacher/analytics">Analytics</a></li>
+            <li><a href="/teacher/profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    <main>
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Exam Results</h1>
+                <p>Welcome back, <strong>{{ name }}</strong></p>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    Filter Exams
+                </div>
+                <form method="GET" id="filter-form">
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Course</label>
+                            <select name="course_id" id="course-select">
+                                <option value="">All Courses</option>
+                                {% for c in courses %}
+                                    <option value="{{ c.course_id }}" {% if selected_course == c.course_id %}selected{% endif %}>
+                                        {{ c.course_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Semester</label>
+                            <select name="semester_id" id="semester-select">
+                                <option value="">All Semesters</option>
+                            </select>
+
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Subject</label>
+                            <select name="subject_id" id="subject-select">
+                                <option value="">All Subjects</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>From Date</label>
+                            <input type="date" name="date_from" id="date-from" value="{{ date_from or '' }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>To Date</label>
+                            <input type="date" name="date_to" id="date-to" value="{{ date_to or '' }}" max="{{ today }}">
+
+                        </div>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        <a href="{{ url_for('view_results') }}" class="btn btn-secondary">Clear Filters</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Exam Selector -->
+            <div class="exam-selector">
+                <form method="GET" id="exam-form">
+                    <!-- Preserve filter parameters -->
+                    <input type="hidden" name="course_id" value="{{ selected_course or '' }}">
+                    <input type="hidden" name="semester_id" value="{{ selected_semester or '' }}">
+                    <input type="hidden" name="subject_id" value="{{ selected_subject or '' }}">
+                    <input type="hidden" name="date_from" value="{{ date_from or '' }}">
+                    <input type="hidden" name="date_to" value="{{ date_to or '' }}">
+                    
+                    <label for="exam-select">Select Exam</label>
+                    <select name="exam_id" id="exam-select" onchange="this.form.submit()">
+                        <option value="">-- Choose an exam to view results --</option>
+                        {% for exam in exams %}
+                            <option value="{{ exam.exam_id }}" {% if selected_exam_id == exam.exam_id %}selected{% endif %}>
+                                {{ exam.display_label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+
+            {% if selected_exam_id and exam_stats %}
+                <!-- Results Card -->
+                <div class="results-card">
+                    <!-- Results Header -->
+                    <div class="results-header">
+                        <h2>{{ exam_stats.exam_name }}</h2>
+                        <div class="export-actions">
+                            <a href="{{ url_for('export_results_excel', exam_id=selected_exam_id) }}" 
+                            class="btn btn-success">
+                                Export Excel
+                            </a>
+                            <a href="{{ url_for('export_results_pdf', exam_id=selected_exam_id) }}" 
+                            class="btn btn-danger">
+                                Export PDF
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Exam Info Banner -->
+                    <div class="exam-info-banner">
+                        <div class="exam-info-item">
+                            <div class="exam-info-label">Course</div>
+                            <div class="exam-info-value">{{ exam_stats.course_name }}</div>
+                        </div>
+                        <div class="exam-info-item">
+                            <div class="exam-info-label">Semester</div>
+                            <div class="exam-info-value">{{ exam_stats.semester_name }}</div>
+                        </div>
+                        <div class="exam-info-item">
+                            <div class="exam-info-label">Subject</div>
+                            <div class="exam-info-value">{{ exam_stats.subject_name }}</div>
+                        </div>
+                        <div class="exam-info-item">
+                            <div class="exam-info-label">Date & Time</div>
+                            <div class="exam-info-value">{{ exam_stats.formatted_date }}</div>
+                        </div>
+                        <div class="exam-info-item">
+                            <div class="exam-info-label">Max Marks</div>
+                            <div class="exam-info-value">{{ exam_stats.max_marks }}</div>
+                        </div>
+                        <div class="exam-info-item">
+                            <div class="exam-info-label">Min Marks</div>
+                            <div class="exam-info-value">{{ exam_stats.min_marks }}</div>
+                        </div>
+                    </div>
+
+                    {% if results %}
+                        <!-- Statistics Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-card passed">
+                                <div class="stat-value">{{ exam_stats.passed_students }}</div>
+                                <div class="stat-label">Students Passed</div>
+                            </div>
+                            
+                            <div class="stat-card failed">
+                                <div class="stat-value">{{ exam_stats.failed_students }}</div>
+                                <div class="stat-label">Students Failed</div>
+                            </div>
+                            
+                            <div class="stat-card percentage">
+                                <div class="stat-value">{{ exam_stats.pass_percentage }}%</div>
+                                <div class="stat-label">Pass Rate</div>
+                            </div>
+                            
+                            <div class="stat-card average">
+                                <div class="stat-value">{{ "%.2f"|format(exam_stats.avg_score) }}</div>
+                                <div class="stat-label">Average Score</div>
+                            </div>
+                            
+                            <div class="stat-card average">
+                                <div class="stat-value">{{ "%.2f"|format(exam_stats.avg_final) }}</div>
+                                <div class="stat-label">Average Final</div>
+                            </div>
+                            
+                            <div class="stat-card highest">
+                                <div class="stat-value">{{ "%.2f"|format(exam_stats.highest_score) }}</div>
+                                <div class="stat-label">Highest Score</div>
+                            </div>
+                        </div>
+
+                        <!-- Results Table -->
+                        <div class="table-wrapper">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Roll No</th>
+                                        <th>Enrollment No</th>
+                                        <th>Student Name</th>
+                                        <th>Score</th>
+                                        <th>Final Score</th>
+                                        <th>Max Marks</th>
+                                        <th>Percentage</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for r in results %}
+                                    <tr>
+                                        <td>
+                                            <span class="rank-badge {% if loop.index <= 3 %}top-3{% endif %}">
+                                                {{ loop.index }}
+                                            </span>
+                                        </td>
+                                        <td><strong>{{ r.roll_no }}</strong></td>
+                                        <td>{{ r.enrollment_no }}</td>
+                                        <td style="text-align: left;">{{ r.student_name }}</td>
+                                        <td>
+                                            <div class="score-display">
+                                                <span class="score-value">{{ "%.2f"|format(r.total_score) }}</span>
+                                                <span class="score-label">Score</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="final-score">{{ r.final_score }}</span>
+                                        </td>
+                                        <td><strong>{{ r.max_marks }}</strong></td>
+                                        <td>
+                                            <strong style="color: {% if r.percentage >= 60 %}#27ae60{% elif r.percentage >= 40 %}#f39c12{% else %}#e74c3c{% endif %};">
+                                                {{ "%.2f"|format(r.percentage) }}%
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge {% if r.result_status == 'Pass' %}pass{% else %}fail{% endif %}">
+                                                {{ r.result_status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">No Results Available</div>
+                            <h3>No Results Available</h3>
+                            <p>No students have completed this exam yet or results haven't been finalized.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">Select an Exam to View Results</div>
+                    <h3>Select an Exam to View Results</h3>
+                    <p>Choose an exam from the dropdown above to see detailed results and statistics.</p>
+                    <p><small>Only finalized exams are available for viewing.</small></p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+    
+
+
+<script>
+    /* ---------- EXISTING CODE (KEEP AS IS) ---------- */
+
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('closed');
+        document.querySelector('main').classList.toggle('full-width');
+    }
+
+    document.getElementById('date-from').addEventListener('change', function () {
+        const from = this.value;
+        const toInput = document.getElementById('date-to');
+        if (from) {
+            toInput.min = from;
+            if (toInput.value && toInput.value < from) {
+                toInput.value = from;
+            }
+        } else {
+            toInput.removeAttribute('min');
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', function () {
+        const fromInput = document.getElementById('date-from');
+        if (fromInput.value) {
+            document.getElementById('date-to').min = fromInput.value;
+        }
+    });
+
+    /* ---------- ADD THIS BELOW (FILTER LOGIC) ---------- */
+
+    const filterForm   = document.getElementById('filter-form');
+    const courseSel    = document.getElementById('course-select');
+    const semesterSel  = document.getElementById('semester-select');
+    const subjectSel   = document.getElementById('subject-select');
+
+    function submitFilters() {
+        const params = new URLSearchParams(new FormData(filterForm));
+        window.location = `${window.location.pathname}?${params.toString()}`;
+    }
+
+    courseSel.addEventListener('change', () => {
+        const cid = courseSel.value;
+
+        semesterSel.innerHTML = '<option value="">All Semesters</option>';
+        subjectSel.innerHTML  = '<option value="">All Subjects</option>';
+
+        if (!cid) return submitFilters();
+
+        fetch(`/teacher/get_semesters/${cid}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.semesters) {
+                    data.semesters.forEach(s => {
+                        semesterSel.appendChild(
+                            new Option(s.semester_name, s.semester_id)
+                        );
+                    });
+                }
+                submitFilters();
+            });
+    });
+
+    semesterSel.addEventListener('change', () => {
+        const sid = semesterSel.value;
+
+        subjectSel.innerHTML = '<option value="">All Subjects</option>';
+
+        if (!sid) return submitFilters();
+
+        fetch(`/teacher/get_subjects/${sid}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.subjects) {
+                    data.subjects.forEach(sub => {
+                        subjectSel.appendChild(
+                            new Option(sub.subject_name, sub.subject_id)
+                        );
+                    });
+                }
+                submitFilters();
+            });
+    });
+
+    subjectSel.addEventListener('change', submitFilters);
+
+    filterForm.querySelectorAll('input[type="date"]').forEach(
+        el => el.addEventListener('change', submitFilters)
+    );
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const sc = "{{ selected_course or '' }}";
+        const ss = "{{ selected_semester or '' }}";
+        const sb = "{{ selected_subject or '' }}";
+
+        if (sc) {
+            courseSel.value = sc;
+
+            fetch(`/teacher/get_semesters/${sc}`)
+                .then(r => r.json())
+                .then(data => {
+                    semesterSel.innerHTML = '<option value="">All Semesters</option>';
+                    data.semesters.forEach(s => {
+                        semesterSel.appendChild(
+                            new Option(s.semester_name, s.semester_id)
+                        );
+                    });
+
+                    if (ss) {
+                        semesterSel.value = ss;
+
+                        fetch(`/teacher/get_subjects/${ss}`)
+                            .then(r => r.json())
+                            .then(d => {
+                                subjectSel.innerHTML = '<option value="">All Subjects</option>';
+                                d.subjects.forEach(sub => {
+                                    subjectSel.appendChild(
+                                        new Option(sub.subject_name, sub.subject_id)
+                                    );
+                                });
+                                if (sb) subjectSel.value = sb;
+                            });
+                    }
+                });
+        }
+    });
+</script>
+
+</body>
+</html>

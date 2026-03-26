@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Results - EduAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: #f4f7fa; 
+            color: #333; 
+            margin: 0;
+            padding: 0;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .sidebar.closed {
+            transform: translateX(-250px);
+        }
+        
+        .sidebar-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: left 0.3s ease;
+        }
+        
+        .sidebar.closed ~ .sidebar-toggle {
+            left: 20px;
+        }
+        
+        .sidebar:not(.closed) ~ .sidebar-toggle {
+            left: 270px;
+        }
+        
+        .admin-main {
+            margin-left: 250px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+        
+        .admin-main.full-width {
+            margin-left: 0;
+        }
+        
+        .card { 
+            background-color: #ffffff; 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
+            margin-bottom: 20px; 
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .page-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .flash { 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            border-radius: 8px; 
+            font-weight: 500;
+        }
+        
+        .flash.success { 
+            background-color: #d4edda; 
+            color: #155724; 
+            border-left: 4px solid #28a745;
+        }
+        
+        .flash.error { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            border-left: 4px solid #dc3545;
+        }
+        
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 30px;
+        }
+        
+        .stats-card { 
+            padding: 25px; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stats-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .stats-card.total i { color: #667eea; }
+        .stats-card.evaluated i { color: #28a745; }
+        .stats-card.average i { color: #ffc107; }
+        .stats-card.pending i { color: #6c757d; }
+        
+        .stats-card h3 { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            margin: 10px 0 5px 0; 
+        }
+        
+        .stats-card.total h3 { color: #667eea; }
+        .stats-card.evaluated h3 { color: #28a745; }
+        .stats-card.average h3 { color: #ffc107; }
+        .stats-card.pending h3 { color: #6c757d; }
+        
+        .stats-card p { 
+            color: #666; 
+            font-weight: 600; 
+            margin: 0; 
+        }
+        
+        .results-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background: #ffffff; 
+            border-radius: 8px; 
+            overflow: hidden; 
+        }
+        
+        .results-table th, 
+        .results-table td { 
+            padding: 15px; 
+            text-align: left; 
+            border-bottom: 1px solid #dee2e6; 
+        }
+        
+        .results-table th { 
+            background-color: #f6f9fcff; 
+            font-weight: 600; 
+            color: #ffffff;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .results-table tr:hover { 
+            background-color: #f8f9fa; 
+        }
+        
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-pass { 
+            background: #d4edda; 
+            color: #155724; 
+        }
+        
+        .status-fail { 
+            background: #f8d7da; 
+            color: #721c24; 
+        }
+        
+        .status-not-evaluated { 
+            background: #fff3cd; 
+            color: #856404; 
+        }
+        
+        .view-details-btn { 
+            padding: 8px 18px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            display: inline-block; 
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        
+        .view-details-btn:hover { 
+            background-color: #0056b3; 
+        }
+        
+        .no-results { 
+            text-align: center; 
+            padding: 50px 30px; 
+            background: #f8f9fa; 
+            border-radius: 12px; 
+            border: 2px dashed #dee2e6;
+        }
+        
+        .no-results i {
+            font-size: 4rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .no-results h3 { 
+            color: #495057; 
+            margin-bottom: 10px; 
+            font-size: 1.5rem;
+        }
+        
+        .no-results p { 
+            color: #6c757d; 
+            font-size: 1rem;
+        }
+        
+        .performance-breakdown {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-top: 30px;
+        }
+        
+        .performance-breakdown h2 {
+            margin-bottom: 20px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .breakdown-item {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .breakdown-item.excellent { background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); }
+        .breakdown-item.good { background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%); }
+        .breakdown-item.average { background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); }
+        .breakdown-item.poor { background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); }
+        
+        .breakdown-item h3 {
+            font-size: 2rem;
+            margin: 0 0 5px 0;
+            font-weight: 700;
+        }
+        
+        .breakdown-item.excellent h3 { color: #155724; }
+        .breakdown-item.good h3 { color: #0c5460; }
+        .breakdown-item.average h3 { color: #856404; }
+        .breakdown-item.poor h3 { color: #721c24; }
+        
+        .breakdown-item p {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .info-card { 
+            padding: 20px; 
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 12px; 
+            border-left: 4px solid #2196f3;
+            margin-top: 30px; 
+        }
+        
+        .info-card h4 { 
+            color: #1976d2; 
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .info-card ul { 
+            color: #0d47a1; 
+            margin: 0; 
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .info-card ul li {
+            margin-bottom: 8px;
+        }
+        
+        .percentage-badge {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-250px);
+            }
+            
+            .admin-main {
+                margin-left: 0;
+            }
+            
+            .sidebar-toggle {
+                left: 20px !important;
+            }
+            
+            .results-table {
+                font-size: 0.85rem;
+            }
+            
+            .results-table th,
+            .results-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <button class="sidebar-toggle">☰</button>
+    
+    <nav class="sidebar">
+        <a href="/" class="logo">EduAI</a>
+        <ul class="nav-links">
+            <li><a href="/student_dashboard">Dashboard</a></li>
+            <li><a href="/student/exams">Exams</a></li>
+            <li><a href="/student/results" class="active">Results</a></li>
+            <li><a href="/student/progress">Progress</a></li>
+            <li><a href="/student/profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main class="admin-main">
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="page-header">
+            <h1><i class="fas fa-chart-line"></i> My Exam Results</h1>
+            <p style="opacity: 0.9; font-size: 1.1rem;">Track your academic performance and progress</p>
+        </div>
+
+        {% if results %}
+            <!-- Overall Statistics -->
+            <div class="stats-grid">
+                <div class="stats-card total">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>{{ results|length }}</h3>
+                    <p>Total Exams Taken</p>
+                </div>
+                
+                <div class="stats-card evaluated">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>{{ results|selectattr('evaluation_status', 'equalto', 'Evaluated')|list|length }}</h3>
+                    <p>Evaluated Exams</p>
+                </div>
+                
+                <div class="stats-card average">
+                    <i class="fas fa-percentage"></i>
+                    <h3>
+                        {% set evaluated_results = results|selectattr('evaluation_status', 'equalto', 'Evaluated')|list %}
+                        {% if evaluated_results %}
+                            {% set avg = (evaluated_results|sum(attribute='percentage') / evaluated_results|length) %}
+                            {{ "%.1f"|format(avg) }}%
+                        {% else %}
+                            0.0%
+                        {% endif %}
+                    </h3>
+                    <p>Average Score</p>
+                </div>
+                
+                <div class="stats-card pending">
+                    <i class="fas fa-hourglass-half"></i>
+                    <h3>{{ results|selectattr('evaluation_status', 'equalto', 'Not Evaluated')|list|length }}</h3>
+                    <p>Pending Evaluation</p>
+                </div>
+            </div>
+
+            <!-- Exam-wise Results -->
+            <div class="card">
+                <h2 style="margin-bottom: 20px; color: #495057; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-table"></i> Detailed Results
+                </h2>
+                <div style="overflow-x: auto;">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-book"></i> Exam Name</th>
+                                <th><i class="fas fa-tag"></i> Topic</th>
+                                <th><i class="fas fa-calendar"></i> Date</th>
+                                <th style="text-align: center;"><i class="fas fa-question-circle"></i> Questions</th>
+                                <th style="text-align: center;"><i class="fas fa-check"></i> Answered</th>
+                                <th style="text-align: center;"><i class="fas fa-star"></i> Score</th>
+                                <th style="text-align: center;"><i class="fas fa-percentage"></i> Percentage</th>
+                                <th style="text-align: center;"><i class="fas fa-award"></i> Result</th>
+                                <th style="text-align: center;"><i class="fas fa-eye"></i> Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td style="font-weight: 600; color: #667eea;">{{ result.exam_name }}</td>
+                                <td>{{ result.topic }}</td>
+                                <td>{{ result.exam_date.strftime('%d %b %Y') if result.exam_date else 'N/A' }}</td>
+                                <td style="text-align: center; font-weight: 600;">{{ result.total_questions }}</td>
+                                <td style="text-align: center; font-weight: 600;">{{ result.answered_questions }}</td>
+                                <td style="text-align: center; font-weight: 700; color: #667eea;">
+                                    {% if result.evaluation_status == 'Evaluated' %}
+                                        {{ "%.0f"|format(result.final_score) }}/{{ "%.0f"|format(result.max_marks) }}
+                                    {% else %}
+                                        <span style="color: #6c757d;">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
+                                    {% if result.evaluation_status == 'Evaluated' %}
+                                        <span class="percentage-badge" style="color: {% if result.percentage >= 75 %}#28a745{% elif result.percentage >= 60 %}#17a2b8{% elif result.percentage >= 40 %}#ffc107{% else %}#dc3545{% endif %};">
+                                            {{ "%.1f"|format(result.percentage) }}%
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #6c757d; font-weight: 600;">—</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
+                                    {% if result.evaluation_status == 'Evaluated' %}
+                                        {% if result.result_status == 'Pass' %}
+                                            <span class="status-badge status-pass">
+                                                <i class="fas fa-check"></i> Pass
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge status-fail">
+                                                <i class="fas fa-times"></i> Fail
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="status-badge status-not-evaluated">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
+                                    <a href="{{ url_for('student_view_result_detail', exam_id=result.exam_id) }}" class="view-details-btn">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Performance Breakdown -->
+            <div class="performance-breakdown">
+                <h2><i class="fas fa-chart-pie"></i> Performance Breakdown</h2>
+                <div class="breakdown-grid">
+                    {% set evaluated = results|selectattr('evaluation_status', 'equalto', 'Evaluated')|list %}
+                    {% set excellent = evaluated|selectattr('percentage', 'ge', 90)|list|length %}
+                    {% set good = evaluated|selectattr('percentage', 'ge', 75)|selectattr('percentage', 'lt', 90)|list|length %}
+                    {% set average = evaluated|selectattr('percentage', 'ge', 40)|selectattr('percentage', 'lt', 75)|list|length %}
+                    {% set poor = evaluated|selectattr('percentage', 'lt', 40)|list|length %}
+                    
+                    <div class="breakdown-item excellent">
+                        <i class="fas fa-trophy" style="font-size: 2rem; color: #155724; margin-bottom: 10px;"></i>
+                        <h3>{{ excellent }}</h3>
+                        <p>Excellent (90%+)</p>
+                    </div>
+                    
+                    <div class="breakdown-item good">
+                        <i class="fas fa-thumbs-up" style="font-size: 2rem; color: #0c5460; margin-bottom: 10px;"></i>
+                        <h3>{{ good }}</h3>
+                        <p>Good (75-89%)</p>
+                    </div>
+                    
+                    <div class="breakdown-item average">
+                        <i class="fas fa-star-half-alt" style="font-size: 2rem; color: #856404; margin-bottom: 10px;"></i>
+                        <h3>{{ average }}</h3>
+                        <p>Average (40-74%)</p>
+                    </div>
+                    
+                    <div class="breakdown-item poor">
+                        <i class="fas fa-chart-line" style="font-size: 2rem; color: #721c24; margin-bottom: 10px;"></i>
+                        <h3>{{ poor }}</h3>
+                        <p>Need Improvement (<40%)</p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="no-results">
+                <i class="fas fa-clipboard-list"></i>
+                <h3>No Results Available</h3>
+                <p>You haven't received any exam results yet. Results will appear here once your exams are evaluated by teachers.</p>
+            </div>
+        {% endif %}
+
+        <div class="info-card">
+            <h4><i class="fas fa-info-circle"></i> Understanding Your Results</h4>
+            <ul>
+                <li><strong>Pass/Fail Status:</strong> Based on minimum passing marks set by your teacher for each exam</li>
+                <li><strong>Percentage Score:</strong> Your obtained marks relative to the maximum marks for the exam</li>
+                <li><strong>View Details:</strong> Click to see question-wise breakdown, your answers, and model answers</li>
+                <li><strong>Performance Breakdown:</strong> Visual representation of your performance across all evaluated exams</li>
+                <li><strong>Pending Evaluation:</strong> Exams marked as "Pending" are awaiting teacher evaluation</li>
+            </ul>
+        </div>
+    </main>
+
+    <!-- <footer>
+        <p>© 2025 EduAI - Smart Question Answer System. All rights reserved.</p>
+    </footer> -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.querySelector('.sidebar');
+            const mainElement = document.querySelector('.admin-main');
+            const toggle = document.querySelector('.sidebar-toggle');
+
+            toggle.addEventListener('click', () => {
+                sidebar.classList.toggle('closed');
+                mainElement.classList.toggle('full-width');
+            });
+        });
+    </script>
+</body>
+</html>

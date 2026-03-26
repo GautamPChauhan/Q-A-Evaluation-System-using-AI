@@ -1,0 +1,103 @@
+# EduAI System Specification & Workflow Architecture
+
+This document outlines the complete, end-to-end technical flow of the EduAI system. It details the interaction between users, the backend architecture, and the advanced AI models powering the automated generation and evaluation of subjective examinations.
+
+---
+
+## 1. USER ROLES & ACCESS
+The system uses a Role-Based Access Control (RBAC) model managed via Flask sessions and MySQL.
+
+- **Admin:** Manages course curriculums (Departments, Courses, Semesters, Subjects). Can add new teachers and students.
+- **Teacher:** Creates exams, uploads source material (PDFs/Excel), reviews AI-generated answer keys, and monitors student evaluations.
+- **Student:** Views scheduled exams, submits descriptive answers, and reviews detailed AI feedback.
+
+---
+
+## 2. EXAM CREATION WORKFLOW (PDF-QA ENGINE)
+
+When a teacher creates a new exam, they supply:
+1. An Excel file containing Questions and Maximum Marks.
+2. A PDF document (Textbook/Notes) acting as the source of truth.
+
+### Step 2.1: PDF Text Extraction
+- **Module:** `pdf_qa_engine.py -> extract_text_from_pdf()`
+- **Flow:** The system attempts to read the uploaded PDF using `pdfplumber`. If that fails or the format is incompatible, it falls back to `PyPDF2`. The extracted text is aggressively cleaned of non-printable characters.
+
+### Step 2.2: Two-Phase AI Answer Generation
+For every question in the Excel file, the system interacts with the Groq API (Llama-3.3-70B-versatile) to generate a "Model Answer".
+- **Module:** `pdf_qa_engine.py -> generate_answer_for_question()`
+- **Phase 1 (Strict Extraction):** The AI is prompted to find the answer *strictly* within the extracted PDF text (truncated to 15,000 characters to respect API Token limits).
+- **Phase 2 (Knowledge Supplementation):** If Phase 1 returns a [NOT_FOUND] or [PARTIAL] flag, or if the extracted answer's word count is insufficient for the allocated `max_marks`, Phase 2 is triggered. The AI supplements the answer with its own general knowledge to construct a comprehensive response.
+- **Marks-Proportional Sizing:** The system explicitly prompts the LLM to scale the answer length based on `max_marks` (e.g., 2 marks = 2-4 sentences; 10 marks = 12-20 sentences).
+- **Rate Limiting:** A 35-second delay is enforced between AI queries to comply with Groq's 12,000 Tokens-Per-Minute free-tier restriction.
+
+### Step 2.3: Keyword Configuration Generation
+- **Module:** `edu_ai/evaluation_engine/keyword_engine.py -> extract_keywords_from_model_answer()`
+- **Flow:** Once the Model Answer is finalized, the system passes it through `KeyBERT` (using the `all-MiniLM-L6-v2` model) to extract core concept unigrams, bigrams, and trigrams. These keywords are saved immutably into the MySQL `questions` table as JSON alongside the model answer.
+
+---
+
+## 3. STUDENT SUBMISSION WORKFLOW
+- The student logs in, navigates to the active exam, and submits descriptive text answers.
+- The raw answers are stored directly into the `student_answers` table in MySQL, awaiting evaluation.
+
+---
+
+## 4. HYBRID AI EVALUATION WORKFLOW (70% Semantic / 30% Keyword)
+
+When a teacher triggers the evaluation process, the system evaluates the student's raw text against the AI-generated model answer.
+
+### Step 4.1: Preprocessing
+- **Module:** `edu_ai/evaluation_engine/preprocessing.py`
+- **Flow:** Both the student's answer and the model answer are passed through `spaCy (en_core_web_sm)`.
+- The text is lowercased, stripped of distinct punctuation, and normalized. 
+- Most importantly, the text is tokenized into exact logical sentences (`doc.sents`), and lemmatized tokens are extracted for keyword matching.
+
+### Step 4.2: Edge Case Detection
+- **Module:** `edu_ai/evaluation_engine/scoring_engine.py`
+- **Flow:** 
+  - If the answer is completely empty, it immediately returns 0.
+  - **Repetition Check:** If the ratio of unique student sentences to total sentences drops below 40%, a severe "spamming" penalty is applied.
+
+### Step 4.3: Semantic Similarity Scoring (Layer 1)
+- **Module:** `edu_ai/evaluation_engine/semantic_engine.py`
+- **Flow:** 
+  - Uses `SentenceTransformer ('all-mpnet-base-v2')` to convert all sentences into 768-dimensional dense vector embeddings.
+  - Model answer embeddings are cached to drastically improve performance across multiple students.
+  - The system computes the Cosine Similarity between every student sentence and every model sentence.
+  - For each model sentence, it finds the "best matching" student sentence, generating a base Semantic Score.
+
+### Step 4.4: Meaning Validation / Logic Guard (Layer 2)
+- **Module:** `edu_ai/evaluation_engine/nli_engine.py`
+- **Flow:** 
+  - Addresses the flaw of Cosine Similarity where "The CPU is the heart" and "The CPU is not the heart" score highly due to word overlap.
+  - Uses Natural Language Inference (`facebook/bart-large-mnli`).
+  - Passes the best-matched sentence pairs as Premise and Hypothesis to calculate probability scores for Entailment, Contradiction, and Neutrality.
+  - **Rules:**
+    - If Contradiction > 0.5: The semantic score for that specific sentence is dropped to 0.
+    - If Entailment > 0.6: The semantic score is verified and kept.
+    - If Neutral > Entailment/Contradiction: The semantic score is halved (penalizing vague responses).
+
+### Step 4.5: Keyword Precision Scoring (Layer 3)
+- **Module:** `edu_ai/evaluation_engine/keyword_engine.py`
+- **Flow:** 
+  - Evaluates the student's response against the pre-extracted `KeyBERT` JSON configuration using a cascading 4-Tier Match:
+    - 1. **Exact Match (1.0 weight):** Concept found exactly in raw text.
+    - 2. **Lemma Match (0.8 weight):** Concept found matching a root lemma (e.g., "running" matches "run").
+    - 3. **Synonym Match (0.6 weight):** Concept matches a `WordNet` synonym.
+    - 4. **Fuzzy Match (0.5 weight):** Concept has an 85%+ Levenshtein similarity via `rapidfuzz` (catches student typos).
+
+### Step 4.6: Final Orchestration & Output
+- **Module:** `edu_ai/evaluation_engine/scoring_engine.py`
+- **Flow:**
+  - Standardizes the Adjusted Semantic Score (70%) and Keyword Score (30%).
+  - **Short Answer Penalty:** If the question is worth 10 marks but the student only wrote 8 words, an overall 20% penalty multiplier is applied.
+  - The final score is scaled to the question's `max_marks`.
+  - Outputs a highly structured JSON dictionary mapping the overall score alongside diagnostics for the UI: `matched_sentences` (with their NLI status), `contradictions_detected`, `missing_concepts`, and `missing_keywords`.
+
+---
+
+## 5. DATABASE INTEGRATION & UI FEEDBACK
+- The JSON output from the `scoring_engine` is parsed in `app.py`.
+- The `marks_awarded` are saved to the `evaluations` MySQL table.
+- The deep JSON diagnostics are saved into the `keyword_breakdown` column, which the frontend templates (`evaluate_student.html`) parse to show the teacher exactly *why* a student received a specific grade, providing total transparency to the AI's logic.
